@@ -21,4 +21,4 @@ This program demonstrates basic Python input/output operations by:
 
 ## Requirements
 
-- Python 3.x 
+- Python 3.x
