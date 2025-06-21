@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Greeter - Interactive Personalized Greetings</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🌟 Dynamic Greeter 🌟</h1>
+            <p>Interactive and Personalized Greetings</p>
+        </header>
+
+        <main class="main-content">
+            <div class="greeter-card">
+                <div class="input-section">
+                    <h2>Get Your Personalized Greeting</h2>
+                    <div class="input-group">
+                        <input type="text" id="userName" placeholder="Enter your name..." maxlength="50">
+                        <button id="greetBtn" onclick="generateGreeting()">Get Greeting</button>
+                    </div>
+                </div>
+
+                <div class="output-section" id="outputSection" style="display: none;">
+                    <div class="greeting-display">
+                        <div id="greetingText" class="greeting-text"></div>
+                        <div id="dayMessage" class="day-message"></div>
+                        <div id="dateInfo" class="date-info"></div>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h3>📊 Quick Stats</h3>
+                        <div id="statsContent" class="stats-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-info">
+                <h2>About This Project</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🎯 Purpose</h3>
+                        <p>An interactive and personalized greeting program that precisely adapts to each user and the moment they run it.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>⚡ Features</h3>
+                        <ul>
+                            <li>Time-aware greetings</li>
+                            <li>Personalized messages</li>
+                            <li>Day-specific enthusiasm</li>
+                            <li>Dynamic context</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3>🛠️ Technology</h3>
+                        <ul>
+                            <li>Python (Backend Logic)</li>
+                            <li>HTML/CSS/JavaScript</li>
+                            <li>Responsive Design</li>
+                            <li>Modern UI/UX</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Built with ❤️ using AI-assisted development</p>
+            <p>Dynamic Greeter Project - Interactive Personalized Greetings</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
