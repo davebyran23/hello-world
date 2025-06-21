@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Greeter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .title {
+            color: #667eea;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        .name-input {
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            width: 300px;
+            margin-right: 15px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .name-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .greet-button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .greet-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .greet-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .result-container {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid #dee2e6;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .greeting-text {
+            font-size: 2rem;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .time-info {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-label {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .special-greeting {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .name-input {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .greet-button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1 class="title">🌟 Dynamic Greeter 🌟</h1>
+        <p class="subtitle">Personalized greetings that adapt to you and the moment</p>
+        
+        <div class="input-section">
+            <input type="text" id="nameInput" class="name-input" placeholder="Enter your name..." maxlength="30">
+            <button onclick="generateGreeting()" class="greet-button">Get Greeting</button>
+        </div>
+        
+        <div id="resultContainer" class="result-container">
+            <div id="greetingText" class="greeting-text"></div>
+            <div id="timeInfo" class="time-info"></div>
+            <div id="statsGrid" class="stats-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        function generateGreeting() {
+            const name = document.getElementById('nameInput').value.trim();
+            
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            const now = new Date();
+            const hour = now.getHours();
+            const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+            const dayNumber = now.getDate();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            
+            // Get time-based greeting
+            let timeGreeting;
+            if (hour >= 5 && hour < 12) {
+                timeGreeting = "Good morning";
+            } else if (hour >= 12 && hour < 17) {
+                timeGreeting = "Good afternoon";
+            } else if (hour >= 17 && hour < 21) {
+                timeGreeting = "Good evening";
+            } else {
+                timeGreeting = "Good night";
+            }
+            
+            // Check for special names
+            const nameLower = name.toLowerCase();
+            let greeting;
+            let isSpecial = false;
+            
+            if (nameLower === "david") {
+                greeting = "Hey there, AI Director! 🎉";
+                isSpecial = true;
+            } else if (nameLower === "admin") {
+                greeting = "Welcome back, Administrator! 🔐";
+                isSpecial = true;
+            } else if (nameLower === "alice") {
+                greeting = "Wonderful to see you, Alice! ✨";
+                isSpecial = true;
+            } else if (nameLower === "bob") {
+                greeting = "Hey Bob, great to have you here! 🚀";
+                isSpecial = true;
+            } else {
+                greeting = `${timeGreeting}, ${name}!`;
+            }
+            
+            // Display results
+            const resultContainer = document.getElementById('resultContainer');
+            const greetingText = document.getElementById('greetingText');
+            const timeInfo = document.getElementById('timeInfo');
+            const statsGrid = document.getElementById('statsGrid');
+            
+            if (isSpecial) {
+                greetingText.innerHTML = `<div class="special-greeting">${greeting}</div>`;
+            } else {
+                greetingText.textContent = greeting;
+            }
+            
+            timeInfo.textContent = `Today is ${dayName}, ${monthName} ${dayNumber} at ${timeString}`;
+            
+            // Generate stats
+            statsGrid.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Name Length</div>
+                    <div class="stat-value">${name.length} characters</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Current Time</div>
+                    <div class="stat-value">${timeString}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Time of Day</div>
+                    <div class="stat-value">${timeGreeting.toLowerCase()}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Day of Week</div>
+                    <div class="stat-value">${dayName}</div>
+                </div>
+            `;
+            
+            resultContainer.style.display = 'block';
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('nameInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                generateGreeting();
+            }
+        });
+        
+        // Add focus effect
+        document.getElementById('nameInput').addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        document.getElementById('nameInput').addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+    </script>
+</body>
+</html> 
