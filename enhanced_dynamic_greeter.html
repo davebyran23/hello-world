@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Dynamic Greeter & Transit Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Subway-style header */
+        .subway-header {
+            background: linear-gradient(90deg, #ff6b35, #f7931e, #ff6b35);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subway-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: subway-shine 3s infinite;
+        }
+
+        @keyframes subway-shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .greeting-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        .time-display {
+            font-size: 1.8rem;
+            color: #ffffff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Chat Interface */
+        .chat-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #ff6b35;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .chat-message.user {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            margin-left: auto;
+            color: white;
+        }
+
+        .chat-message.bot {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #ff6b35;
+            border-radius: 25px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Subway-style dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .subway-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 2px solid #ff6b35;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .subway-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b35, #f7931e, #ff6b35);
+        }
+
+        .subway-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 107, 53, 0.3);
+        }
+
+        .card-title {
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Subway line colors */
+        .subway-line {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .line-1 { background: #ff3131; }
+        .line-2 { background: #ff3131; }
+        .line-3 { background: #ff3131; }
+        .line-4 { background: #00933c; }
+        .line-5 { background: #00933c; }
+        .line-6 { background: #00933c; }
+        .line-7 { background: #b933ad; }
+        .line-a { background: #0039a6; }
+        .line-c { background: #0039a6; }
+        .line-e { background: #0039a6; }
+        .line-b { background: #ff6319; }
+        .line-d { background: #ff6319; }
+        .line-f { background: #ff6319; }
+        .line-m { background: #ff6319; }
+        .line-n { background: #fccc0a; }
+        .line-q { background: #fccc0a; }
+        .line-r { background: #fccc0a; }
+        .line-w { background: #fccc0a; }
+        .line-l { background: #a7a9ac; }
+        .line-s { background: #808183; }
+
+        /* Weather section */
+        .weather-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .weather-item {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .weather-item:hover {
+            transform: scale(1.05);
+        }
+
+        .temperature {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ff6b35;
+            margin: 10px 0;
+        }
+
+        /* Transit sections */
+        .transit-item {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ff6b35;
+            transition: all 0.3s ease;
+        }
+
+        .transit-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .transit-time {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff6b35;
+        }
+
+        .transit-status {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-on-time { background: #00ff00; }
+        .status-delayed { background: #ff0000; }
+        .status-crowded { background: #ffff00; }
+
+        /* City images */
+        .city-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ff6b35;
+        }
+
+        /* Buttons */
+        .refresh-btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .weather-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .greeting-display {
+                font-size: 2.5rem;
+            }
+            
+            .chat-input-container {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #ff6b35;
+            font-style: italic;
+        }
+
+        .loading::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Subway-style header -->
+        <div class="subway-header">
+            <div class="greeting-display" id="greeting">Welcome to NYC!</div>
+            <div class="time-display" id="timeDisplay"></div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-section">
+            <h2 style="color: #ff6b35; margin-bottom: 20px; font-size: 1.8rem;">🗣️ Personal Greeter Chat</h2>
+            <div class="chat-container" id="chatContainer">
+                <div class="chat-message bot">
+                    👋 Hello! I'm your NYC personal greeter. How can I help you today? Ask me about weather, transit, or just say hello!
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here..." maxlength="200">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <!-- Subway-style dashboard -->
+        <div class="dashboard-grid">
+            <!-- Weather Card -->
+            <div class="subway-card">
+                <h2 class="card-title">🌤️ NYC & East Coast Weather</h2>
+                <button class="refresh-btn" onclick="updateWeather()">Refresh Weather</button>
+                <div id="weather-container" class="weather-grid">
+                    <div class="loading">Loading weather data</div>
+                </div>
+            </div>
+
+            <!-- NYC Subway Card -->
+            <div class="subway-card">
+                <h2 class="card-title">🚇 NYC Subway Status</h2>
+                <button class="refresh-btn" onclick="updateSubway()">Refresh Subway</button>
+                <div id="subway-container">
+                    <div class="loading">Loading subway data</div>
+                </div>
+            </div>
+
+            <!-- Commuter Rail Card -->
+            <div class="subway-card">
+                <h2 class="card-title">🚆 Commuter Rail & Amtrak</h2>
+                <button class="refresh-btn" onclick="updateCommuterRail()">Refresh Trains</button>
+                <div id="commuter-container">
+                    <div class="loading">Loading commuter rail data</div>
+                </div>
+            </div>
+
+            <!-- Bus & Light Rail Card -->
+            <div class="subway-card">
+                <h2 class="card-title">🚌 Bus & Light Rail</h2>
+                <button class="refresh-btn" onclick="updateBusLightRail()">Refresh Buses</button>
+                <div id="bus-container">
+                    <div class="loading">Loading bus data</div>
+                </div>
+            </div>
+
+            <!-- Traffic Card -->
+            <div class="subway-card">
+                <h2 class="card-title">🚗 Live Traffic</h2>
+                <button class="refresh-btn" onclick="updateTraffic()">Refresh Traffic</button>
+                <div id="traffic-container">
+                    <div class="loading">Loading traffic data</div>
+                </div>
+            </div>
+
+            <!-- City Highlights Card -->
+            <div class="subway-card">
+                <h2 class="card-title">🏙️ East Coast Cities</h2>
+                <div id="cities-container">
+                    <div class="loading">Loading city information</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userName = '';
+        let chatHistory = [];
+
+        // Subway lines data
+        const subwayLines = [
+            { line: '1', name: 'Broadway-7th Ave', status: 'on-time', color: 'line-1' },
+            { line: '2', name: '7th Ave Express', status: 'on-time', color: 'line-2' },
+            { line: '3', name: '7th Ave Express', status: 'delayed', color: 'line-3' },
+            { line: '4', name: 'Lexington Ave Express', status: 'crowded', color: 'line-4' },
+            { line: '5', name: 'Lexington Ave Express', status: 'on-time', color: 'line-5' },
+            { line: '6', name: 'Lexington Ave Local', status: 'on-time', color: 'line-6' },
+            { line: '7', name: 'Flushing Local', status: 'delayed', color: 'line-7' },
+            { line: 'A', name: '8th Ave Express', status: 'on-time', color: 'line-a' },
+            { line: 'C', name: '8th Ave Local', status: 'crowded', color: 'line-c' },
+            { line: 'E', name: '8th Ave Local', status: 'on-time', color: 'line-e' },
+            { line: 'B', name: '6th Ave Express', status: 'delayed', color: 'line-b' },
+            { line: 'D', name: '6th Ave Express', status: 'on-time', color: 'line-d' },
+            { line: 'F', name: '6th Ave Local', status: 'crowded', color: 'line-f' },
+            { line: 'M', name: '6th Ave Local', status: 'on-time', color: 'line-m' },
+            { line: 'N', name: 'Broadway Express', status: 'on-time', color: 'line-n' },
+            { line: 'Q', name: 'Broadway Express', status: 'delayed', color: 'line-q' },
+            { line: 'R', name: 'Broadway Local', status: 'on-time', color: 'line-r' },
+            { line: 'W', name: 'Broadway Local', status: 'crowded', color: 'line-w' },
+            { line: 'L', name: '14th St-Canarsie', status: 'on-time', color: 'line-l' },
+            { line: 'S', name: '42nd St Shuttle', status: 'on-time', color: 'line-s' }
+        ];
+
+        // Commuter rail data
+        const commuterRail = [
+            { system: 'Metro-North', route: 'Hudson Line', from: 'Grand Central', to: 'Poughkeepsie', next: '12:15', status: 'on-time' },
+            { system: 'Metro-North', route: 'Harlem Line', from: 'Grand Central', to: 'Southeast', next: '12:22', status: 'delayed' },
+            { system: 'Metro-North', route: 'New Haven Line', from: 'Grand Central', to: 'New Haven', next: '12:30', status: 'on-time' },
+            { system: 'LIRR', route: 'Main Line', from: 'Penn Station', to: 'Ronkonkoma', next: '12:18', status: 'crowded' },
+            { system: 'LIRR', route: 'Babylon Branch', from: 'Penn Station', to: 'Babylon', next: '12:25', status: 'on-time' },
+            { system: 'NJ Transit', route: 'Northeast Corridor', from: 'Penn Station', to: 'Trenton', next: '12:20', status: 'delayed' },
+            { system: 'NJ Transit', route: 'Morris & Essex', from: 'Penn Station', to: 'Dover', next: '12:28', status: 'on-time' },
+            { system: 'PATH', route: 'NWK-WTC', from: 'World Trade Center', to: 'Newark', next: '12:10', status: 'on-time' },
+            { system: 'PATH', route: 'JSQ-33', from: 'Journal Square', to: '33rd St', next: '12:12', status: 'crowded' },
+            { system: 'Amtrak', route: 'Acela Express', from: 'Penn Station', to: 'Boston', next: '12:45', status: 'on-time' },
+            { system: 'Amtrak', route: 'Northeast Regional', from: 'Penn Station', to: 'Washington DC', next: '12:55', status: 'delayed' }
+        ];
+
+        // Bus and light rail data
+        const busLightRail = [
+            { system: 'MTA Bus', route: 'Bx1', from: 'Riverdale', to: 'Manhattan', next: '12:08', status: 'on-time' },
+            { system: 'MTA Bus', route: 'B44', from: 'Williamsburg', to: 'Sheepshead Bay', next: '12:15', status: 'delayed' },
+            { system: 'MTA Bus', route: 'Q44', from: 'Bronx', to: 'Jamaica', next: '12:22', status: 'crowded' },
+            { system: 'NJ Transit Bus', route: '126', from: 'Port Authority', to: 'Hoboken', next: '12:10', status: 'on-time' },
+            { system: 'NJ Transit Bus', route: '139', from: 'Port Authority', to: 'Lakewood', next: '12:18', status: 'on-time' },
+            { system: 'SEPTA', route: 'Market-Frankford', from: '69th St', to: 'Frankford', next: '12:12', status: 'delayed' },
+            { system: 'SEPTA', route: 'Broad Street', from: 'Fern Rock', to: 'AT&T Station', next: '12:20', status: 'on-time' },
+            { system: 'Baltimore Light Rail', route: 'Light Rail', from: 'BWI Airport', to: 'Hunt Valley', next: '12:25', status: 'on-time' },
+            { system: 'Baltimore Metro', route: 'Metro Subway', from: 'Owings Mills', to: 'Johns Hopkins', next: '12:30', status: 'crowded' }
+        ];
+
+        // Cities data with images
+        const cities = [
+            { 
+                name: 'New York City', 
+                image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&h=200&fit=crop',
+                description: 'The Big Apple - Financial capital and cultural hub',
+                highlights: 'Times Square, Central Park, Empire State Building'
+            },
+            { 
+                name: 'Philadelphia', 
+                image: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&h=200&fit=crop',
+                description: 'City of Brotherly Love - Historic and vibrant',
+                highlights: 'Liberty Bell, Independence Hall, Reading Terminal Market'
+            },
+            { 
+                name: 'Baltimore', 
+                image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=200&fit=crop',
+                description: 'Charm City - Harbor and seafood capital',
+                highlights: 'Inner Harbor, Fort McHenry, Camden Yards'
+            },
+            { 
+                name: 'Boston', 
+                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop',
+                description: 'The Hub - Academic and historic center',
+                highlights: 'Freedom Trail, Harvard Square, Fenway Park'
+            },
+            { 
+                name: 'Washington DC', 
+                image: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=400&h=200&fit=crop',
+                description: 'The Nation\'s Capital - Political and cultural center',
+                highlights: 'National Mall, Smithsonian Museums, Capitol Hill'
+            }
+        ];
+
+        function initApp() {
+            updateTime();
+            updateGreeting();
+            updateWeather();
+            updateSubway();
+            updateCommuterRail();
+            updateBusLightRail();
+            updateTraffic();
+            updateCities();
+            
+            setInterval(updateTime, 1000);
+            setInterval(() => {
+                updateWeather();
+                updateSubway();
+                updateCommuterRail();
+                updateBusLightRail();
+                updateTraffic();
+            }, 5 * 60 * 1000);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            const dateString = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            document.getElementById('timeDisplay').textContent = `${dateString} • ${timeString}`;
+        }
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let greeting = '';
+            
+            if (hour < 12) {
+                greeting = 'Good Morning';
+            } else if (hour < 17) {
+                greeting = 'Good Afternoon';
+            } else {
+                greeting = 'Good Evening';
+            }
+            
+            if (userName) {
+                greeting += `, ${userName}!`;
+            } else {
+                greeting += '!';
+            }
+            
+            greeting += ' Welcome to NYC!';
+            document.getElementById('greeting').textContent = greeting;
+        }
+
+        // Chat functionality
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            // Simulate bot response
+            setTimeout(() => {
+                const response = generateBotResponse(message);
+                addChatMessage(response, 'bot');
+            }, 1000);
+        }
+
+        function addChatMessage(message, sender) {
+            const container = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.textContent = message;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function generateBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey')) {
+                return `Hello! I'm your NYC personal assistant. How can I help you today?`;
+            } else if (lowerMessage.includes('weather')) {
+                return `I can show you the current weather for NYC and other East Coast cities. Check the weather section above!`;
+            } else if (lowerMessage.includes('subway') || lowerMessage.includes('train') || lowerMessage.includes('metro')) {
+                return `The NYC subway system is extensive! Check the subway status section for real-time updates on all lines.`;
+            } else if (lowerMessage.includes('traffic')) {
+                return `I can help you check traffic conditions. The traffic section shows current conditions for major routes.`;
+            } else if (lowerMessage.includes('name')) {
+                if (lowerMessage.includes('my name is') || lowerMessage.includes('i am')) {
+                    const nameMatch = message.match(/(?:my name is|i am)\s+(\w+)/i);
+                    if (nameMatch) {
+                        userName = nameMatch[1];
+                        updateGreeting();
+                        return `Nice to meet you, ${userName}! I'll remember your name.`;
+                    }
+                }
+                return `I'd love to know your name! Just say "My name is [your name]" and I'll remember it.`;
+            } else if (lowerMessage.includes('help')) {
+                return `I can help you with: weather updates, subway status, traffic conditions, commuter rail schedules, and general NYC information. Just ask!`;
+            } else {
+                return `That's interesting! I'm here to help with NYC transit, weather, and general information. What would you like to know?`;
+            }
+        }
+
+        // Weather update
+        async function updateWeather() {
+            const container = document.getElementById('weather-container');
+            container.innerHTML = '<div class="loading">Updating weather</div>';
+
+            setTimeout(() => {
+                const weatherData = cities.map(city => ({
+                    name: city.name,
+                    temp: Math.floor(Math.random() * 30) + 10,
+                    condition: ['Sunny', 'Cloudy', 'Rainy', 'Partly Cloudy', 'Snowy'][Math.floor(Math.random() * 5)],
+                    humidity: Math.floor(Math.random() * 40) + 40
+                }));
+
+                container.innerHTML = weatherData.map(weather => `
+                    <div class="weather-item">
+                        <h3>${weather.name}</h3>
+                        <div class="temperature">${weather.temp}°F</div>
+                        <div style="margin: 10px 0;">${weather.condition}</div>
+                        <div style="font-size: 0.9rem;">Humidity: ${weather.humidity}%</div>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        // Subway update
+        function updateSubway() {
+            const container = document.getElementById('subway-container');
+            container.innerHTML = '<div class="loading">Updating subway status</div>';
+
+            setTimeout(() => {
+                container.innerHTML = subwayLines.map(line => `
+                    <div class="transit-item">
+                        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                            <span class="subway-line ${line.color}"></span>
+                            <span style="font-weight: bold; font-size: 1.2rem;">${line.line}</span>
+                            <span style="margin-left: 10px;">${line.name}</span>
+                        </div>
+                        <div>
+                            <span class="transit-status status-${line.status}"></span>
+                            <span style="text-transform: capitalize;">${line.status.replace('-', ' ')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        // Commuter rail update
+        function updateCommuterRail() {
+            const container = document.getElementById('commuter-container');
+            container.innerHTML = '<div class="loading">Updating commuter rail</div>';
+
+            setTimeout(() => {
+                container.innerHTML = commuterRail.map(train => `
+                    <div class="transit-item">
+                        <div class="transit-time">${train.next}</div>
+                        <div style="font-weight: bold; margin: 5px 0;">${train.system} - ${train.route}</div>
+                        <div>${train.from} → ${train.to}</div>
+                        <div>
+                            <span class="transit-status status-${train.status}"></span>
+                            <span style="text-transform: capitalize;">${train.status.replace('-', ' ')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        // Bus and light rail update
+        function updateBusLightRail() {
+            const container = document.getElementById('bus-container');
+            container.innerHTML = '<div class="loading">Updating bus schedules</div>';
+
+            setTimeout(() => {
+                container.innerHTML = busLightRail.map(bus => `
+                    <div class="transit-item">
+                        <div class="transit-time">${bus.next}</div>
+                        <div style="font-weight: bold; margin: 5px 0;">${bus.system} - ${bus.route}</div>
+                        <div>${bus.from} → ${bus.to}</div>
+                        <div>
+                            <span class="transit-status status-${bus.status}"></span>
+                            <span style="text-transform: capitalize;">${bus.status.replace('-', ' ')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        // Traffic update
+        function updateTraffic() {
+            const container = document.getElementById('traffic-container');
+            container.innerHTML = '<div class="loading">Updating traffic</div>';
+
+            const trafficRoutes = [
+                { route: 'I-95 NYC to Philly', status: 'moderate', time: '2h 15m' },
+                { route: 'I-95 Philly to Baltimore', status: 'good', time: '1h 45m' },
+                { route: 'I-84 NYC to Connecticut', status: 'heavy', time: '2h 30m' },
+                { route: 'FDR Drive NYC', status: 'heavy', time: '45m' },
+                { route: 'West Side Highway NYC', status: 'moderate', time: '30m' },
+                { route: 'I-95 NYC to Boston', status: 'good', time: '4h 30m' }
+            ];
+
+            setTimeout(() => {
+                container.innerHTML = trafficRoutes.map(route => `
+                    <div class="transit-item">
+                        <div>
+                            <strong>${route.route}</strong>
+                            <div style="font-size: 0.9rem; color: #ccc; margin-top: 5px;">
+                                Estimated time: ${route.time}
+                            </div>
+                        </div>
+                        <div style="text-transform: capitalize; font-weight: bold; color: #ff6b35;">
+                            ${route.status}
+                        </div>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        // Cities update
+        function updateCities() {
+            const container = document.getElementById('cities-container');
+            container.innerHTML = '<div class="loading">Loading city information</div>';
+
+            setTimeout(() => {
+                container.innerHTML = cities.map(city => `
+                    <div style="margin-bottom: 25px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                        <img src="${city.image}" alt="${city.name}" class="city-image" onerror="this.style.display='none'">
+                        <h3 style="color: #ff6b35; margin-bottom: 10px;">${city.name}</h3>
+                        <p style="margin-bottom: 8px; color: #ccc;">${city.description}</p>
+                        <p style="font-size: 0.9rem; color: #ff6b35;"><strong>Highlights:</strong> ${city.highlights}</p>
+                    </div>
+                `).join('');
+            }, 1000);
+        }
+
+        // Event listeners
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        window.onload = initApp;
+    </script>
+</body>
+</html> 
