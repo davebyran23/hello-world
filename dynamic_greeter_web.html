@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Greeter - Interactive Personalized Greetings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .greeter-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .input-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #userName {
+            padding: 15px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            width: 300px;
+            max-width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        #userName:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        #greetBtn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #greetBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .output-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .greeting-display {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .greeting-text {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .day-message {
+            font-size: 1.3rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .date-info {
+            font-size: 1.1rem;
+            color: #888;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+
+        .stats-section h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .stats-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .project-info {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .project-info h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-card li:last-child {
+            border-bottom: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            opacity: 0.8;
+        }
+
+        .footer p {
+            margin: 5px 0;
+        }
+
+        /* Data Structures Display */
+        .data-structures {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+
+        .data-structures h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .data-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+
+        .data-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .data-item {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+            font-size: 0.9rem;
+        }
+
+        .status-on-time { color: #28a745; }
+        .status-delayed { color: #dc3545; }
+        .status-crowded { color: #ffc107; }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #userName {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .greeting-text {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🌟 Dynamic Greeter 🌟</h1>
+            <p>Interactive and Personalized Greetings</p>
+        </header>
+
+        <main class="main-content">
+            <div class="greeter-card">
+                <div class="input-section">
+                    <h2>Get Your Personalized Greeting</h2>
+                    <div class="input-group">
+                        <input type="text" id="userName" placeholder="Enter your name..." maxlength="50">
+                        <button id="greetBtn" onclick="generateGreeting()">Get Greeting</button>
+                    </div>
+                </div>
+
+                <div class="output-section" id="outputSection" style="display: none;">
+                    <div class="greeting-display">
+                        <div id="greetingText" class="greeting-text"></div>
+                        <div id="dayMessage" class="day-message"></div>
+                        <div id="dateInfo" class="date-info"></div>
+                    </div>
+                    
+                    <div class="stats-section">
+                        <h3>📊 Quick Stats</h3>
+                        <div id="statsContent" class="stats-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="data-structures">
+                <h2>🏗️ Data Structures Showcase</h2>
+                <div class="data-grid">
+                    <div class="data-card">
+                        <h3>🚇 NYC Subway Lines (20 routes)</h3>
+                        <div id="subwayData"></div>
+                    </div>
+                    <div class="data-card">
+                        <h3>🚆 Commuter Rail (11 routes)</h3>
+                        <div id="railData"></div>
+                    </div>
+                    <div class="data-card">
+                        <h3>🚌 Bus & Light Rail (9 routes)</h3>
+                        <div id="busData"></div>
+                    </div>
+                    <div class="data-card">
+                        <h3>🌤️ Cities Weather (5 cities)</h3>
+                        <div id="weatherData"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-info">
+                <h2>About This Project</h2>
+                <div class="info-grid">
+                    <div class="info-card">
+                        <h3>🎯 Purpose</h3>
+                        <p>An interactive and personalized greeting program that precisely adapts to each user and the moment they run it.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>⚡ Features</h3>
+                        <ul>
+                            <li>Time-aware greetings</li>
+                            <li>Personalized messages</li>
+                            <li>Day-specific enthusiasm</li>
+                            <li>Dynamic context</li>
+                            <li>Real-time transit data</li>
+                            <li>Multi-city weather</li>
+                        </ul>
+                    </div>
+                    <div class="info-card">
+                        <h3>🛠️ Technology</h3>
+                        <ul>
+                            <li>Python (Backend Logic)</li>
+                            <li>HTML/CSS/JavaScript</li>
+                            <li>Responsive Design</li>
+                            <li>Modern UI/UX</li>
+                            <li>Data Structures</li>
+                            <li>Real-time Updates</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Built with ❤️ using AI-assisted development</p>
+            <p>Dynamic Greeter Project - Interactive Personalized Greetings</p>
+        </footer>
+    </div>
+
+    <script>
+        // Data Structures - JavaScript Arrays
+        const subwayLines = [
+            { line: '1', name: 'Broadway-7th Ave', status: 'on-time', color: 'line-1' },
+            { line: '2', name: '7th Ave Express', status: 'on-time', color: 'line-2' },
+            { line: '3', name: '7th Ave Express', status: 'delayed', color: 'line-3' },
+            { line: '4', name: 'Lexington Ave Express', status: 'crowded', color: 'line-4' },
+            { line: '5', name: 'Lexington Ave Express', status: 'on-time', color: 'line-5' },
+            { line: '6', name: 'Lexington Ave Local', status: 'on-time', color: 'line-6' },
+            { line: '7', name: 'Flushing Local', status: 'delayed', color: 'line-7' },
+            { line: 'A', name: '8th Ave Express', status: 'on-time', color: 'line-a' },
+            { line: 'C', name: '8th Ave Local', status: 'crowded', color: 'line-c' },
+            { line: 'E', name: '8th Ave Local', status: 'on-time', color: 'line-e' },
+            { line: 'B', name: '6th Ave Express', status: 'delayed', color: 'line-b' },
+            { line: 'D', name: '6th Ave Express', status: 'on-time', color: 'line-d' },
+            { line: 'F', name: '6th Ave Local', status: 'crowded', color: 'line-f' },
+            { line: 'M', name: '6th Ave Local', status: 'on-time', color: 'line-m' },
+            { line: 'N', name: 'Broadway Express', status: 'on-time', color: 'line-n' },
+            { line: 'Q', name: 'Broadway Express', status: 'delayed', color: 'line-q' },
+            { line: 'R', name: 'Broadway Local', status: 'on-time', color: 'line-r' },
+            { line: 'W', name: 'Broadway Local', status: 'crowded', color: 'line-w' },
+            { line: 'L', name: '14th St-Canarsie', status: 'on-time', color: 'line-l' },
+            { line: 'S', name: '42nd St Shuttle', status: 'on-time', color: 'line-s' }
+        ];
+
+        const commuterRail = [
+            { system: 'Metro-North', route: 'Hudson Line', from: 'Grand Central', to: 'Poughkeepsie', next: '12:15', status: 'on-time' },
+            { system: 'Metro-North', route: 'Harlem Line', from: 'Grand Central', to: 'Southeast', next: '12:22', status: 'delayed' },
+            { system: 'Metro-North', route: 'New Haven Line', from: 'Grand Central', to: 'New Haven', next: '12:30', status: 'on-time' },
+            { system: 'LIRR', route: 'Main Line', from: 'Penn Station', to: 'Ronkonkoma', next: '12:18', status: 'crowded' },
+            { system: 'LIRR', route: 'Babylon Branch', from: 'Penn Station', to: 'Babylon', next: '12:25', status: 'on-time' },
+            { system: 'NJ Transit', route: 'Northeast Corridor', from: 'Penn Station', to: 'Trenton', next: '12:20', status: 'delayed' },
+            { system: 'NJ Transit', route: 'Morris & Essex', from: 'Penn Station', to: 'Dover', next: '12:28', status: 'on-time' },
+            { system: 'PATH', route: 'NWK-WTC', from: 'World Trade Center', to: 'Newark', next: '12:10', status: 'on-time' },
+            { system: 'PATH', route: 'JSQ-33', from: 'Journal Square', to: '33rd St', next: '12:12', status: 'crowded' },
+            { system: 'Amtrak', route: 'Acela Express', from: 'Penn Station', to: 'Boston', next: '12:45', status: 'on-time' },
+            { system: 'Amtrak', route: 'Northeast Regional', from: 'Penn Station', to: 'Washington DC', next: '12:55', status: 'delayed' }
+        ];
+
+        const busLightRail = [
+            { system: 'MTA Bus', route: 'Bx1', from: 'Riverdale', to: 'Manhattan', next: '12:08', status: 'on-time' },
+            { system: 'MTA Bus', route: 'B44', from: 'Williamsburg', to: 'Sheepshead Bay', next: '12:15', status: 'delayed' },
+            { system: 'MTA Bus', route: 'Q44', from: 'Bronx', to: 'Jamaica', next: '12:22', status: 'crowded' },
+            { system: 'NJ Transit Bus', route: '126', from: 'Port Authority', to: 'Hoboken', next: '12:10', status: 'on-time' },
+            { system: 'NJ Transit Bus', route: '139', from: 'Port Authority', to: 'Lakewood', next: '12:18', status: 'on-time' },
+            { system: 'SEPTA', route: 'Market-Frankford', from: '69th St', to: 'Frankford', next: '12:12', status: 'delayed' },
+            { system: 'SEPTA', route: 'Broad Street', from: 'Fern Rock', to: 'AT&T Station', next: '12:20', status: 'on-time' },
+            { system: 'Baltimore Light Rail', route: 'Light Rail', from: 'BWI Airport', to: 'Hunt Valley', next: '12:25', status: 'on-time' },
+            { system: 'Baltimore Metro', route: 'Metro Subway', from: 'Owings Mills', to: 'Johns Hopkins', next: '12:30', status: 'crowded' }
+        ];
+
+        const cities = [
+            { name: 'New York City', temp: 72, condition: 'Sunny', humidity: 65 },
+            { name: 'Philadelphia', temp: 68, condition: 'Partly Cloudy', humidity: 70 },
+            { name: 'Baltimore', temp: 75, condition: 'Cloudy', humidity: 80 },
+            { name: 'Boston', temp: 65, condition: 'Rainy', humidity: 85 },
+            { name: 'Washington DC', temp: 78, condition: 'Sunny', humidity: 60 }
+        ];
+
+        // Dynamic Greeter Functions
+        function getCurrentTimeInfo() {
+            const now = new Date();
+            const hour = now.getHours();
+            const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+            const monthName = now.toLocaleDateString('en-US', { month: 'long' });
+            const dayNumber = now.getDate();
+            
+            return { hour, dayName, monthName, dayNumber };
+        }
+
+        function getTimeGreeting(hour) {
+            if (hour >= 5 && hour < 12) {
+                return "Good morning";
+            } else if (hour >= 12 && hour < 17) {
+                return "Good afternoon";
+            } else if (hour >= 17 && hour < 21) {
+                return "Good evening";
+            } else {
+                return "Good night";
+            }
+        }
+
+        function getSpecialGreeting(name) {
+            const nameLower = name.toLowerCase();
+            
+            const specialGreetings = {
+                "david": "Hey there, AI Director! 🎉",
+                "admin": "Welcome back, Administrator! 🔐",
+                "guest": "Hello, welcome to our system! 👋",
+                "alice": "Wonderful to see you, Alice! ✨",
+                "bob": "Hey Bob, great to have you here! 🚀"
+            };
+            
+            return specialGreetings[nameLower] || null;
+        }
+
+        function getDayEnthusiasm(dayName) {
+            const dayEnthusiasm = {
+                "Monday": "Let's start the week strong! 💪",
+                "Tuesday": "Tuesday energy is flowing! ⚡",
+                "Wednesday": "Hump day - we're halfway there! 🐪",
+                "Thursday": "Almost Friday - keep going! 🎯",
+                "Friday": "TGIF! Weekend is almost here! 🎉",
+                "Saturday": "Perfect day for relaxation! 😌",
+                "Sunday": "Sunday vibes - recharge time! 🌅"
+            };
+            
+            return dayEnthusiasm[dayName] || "Have a wonderful day! 🌟";
+        }
+
+        function generateGreeting() {
+            const userName = document.getElementById('userName').value.trim();
+            
+            if (!userName) {
+                alert('Please enter your name!');
+                return;
+            }
+            
+            const timeInfo = getCurrentTimeInfo();
+            const timeGreeting = getTimeGreeting(timeInfo.hour);
+            const specialGreeting = getSpecialGreeting(userName);
+            const dayMessage = getDayEnthusiasm(timeInfo.dayName);
+            
+            let greeting;
+            if (specialGreeting) {
+                greeting = specialGreeting;
+            } else {
+                greeting = `${timeGreeting}, ${userName}!`;
+            }
+            
+            const dateInfo = `Today is ${timeInfo.dayName}, ${timeInfo.monthName} ${timeInfo.dayNumber}`;
+            
+            document.getElementById('greetingText').textContent = greeting;
+            document.getElementById('dayMessage').textContent = dayMessage;
+            document.getElementById('dateInfo').textContent = dateInfo;
+            
+            const currentTime = new Date().toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+            
+            // Generate stats
+            const statsContent = document.getElementById('statsContent');
+            statsContent.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-label">Name Length</div>
+                    <div class="stat-value">${userName.length} characters</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Current Time</div>
+                    <div class="stat-value">${currentTime}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Time of Day</div>
+                    <div class="stat-value">${timeGreeting.toLowerCase()}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Day of Week</div>
+                    <div class="stat-value">${timeInfo.dayName}</div>
+                </div>
+            `;
+            
+            document.getElementById('outputSection').style.display = 'block';
+            document.getElementById('outputSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // Display Data Structures
+        function displayDataStructures() {
+            // Subway Data
+            const subwayData = document.getElementById('subwayData');
+            subwayData.innerHTML = subwayLines.slice(0, 5).map(line => 
+                `<div class="data-item">
+                    <strong>Line ${line.line}</strong>: ${line.name} 
+                    <span class="status-${line.status}">(${line.status})</span>
+                </div>`
+            ).join('') + '<div class="data-item">... and 15 more lines</div>';
+
+            // Rail Data
+            const railData = document.getElementById('railData');
+            railData.innerHTML = commuterRail.slice(0, 5).map(train => 
+                `<div class="data-item">
+                    <strong>${train.system}</strong>: ${train.route} 
+                    <span class="status-${train.status}">(${train.status})</span>
+                </div>`
+            ).join('') + '<div class="data-item">... and 6 more routes</div>';
+
+            // Bus Data
+            const busData = document.getElementById('busData');
+            busData.innerHTML = busLightRail.slice(0, 5).map(bus => 
+                `<div class="data-item">
+                    <strong>${bus.system}</strong>: ${bus.route} 
+                    <span class="status-${bus.status}">(${bus.status})</span>
+                </div>`
+            ).join('') + '<div class="data-item">... and 4 more routes</div>';
+
+            // Weather Data
+            const weatherData = document.getElementById('weatherData');
+            weatherData.innerHTML = cities.map(city => 
+                `<div class="data-item">
+                    <strong>${city.name}</strong>: ${city.temp}°F, ${city.condition}
+                </div>`
+            ).join('');
+        }
+
+        // Initialize page
+        window.onload = function() {
+            displayDataStructures();
+        };
+
+        // Add keyboard support for Enter key
+        document.getElementById('userName').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                generateGreeting();
+            }
+        });
+    </script>
+</body>
+</html> 
